@@ -13,7 +13,7 @@ from datetime import datetime as DT
 File_Type = ['application/pdf']  # allowed file type
 File_xml_type = ['image/svg+xml']  # tipo xml
 
-CustomerPortal.OPTIONAL_BILLING_FIELDS.append('valid_until')
+CustomerPortal.OPTIONAL_BILLING_FIELDS.append('valid_until',)
 CustomerPortal.OPTIONAL_BILLING_FIELDS.append('partner')
 CustomerPortal.OPTIONAL_BILLING_FIELDS.append('attachment')
 CustomerPortal.OPTIONAL_BILLING_FIELDS.append('estado_opinion')
@@ -88,7 +88,7 @@ class CustomerPortal(CustomerPortal):
             if order_sudo.invoice_status == 'invoiced':
                 values['upload_status_msg'] = 'Error de usuario! El pedido de compra ya cuenta con una factura activa previa.'
             else:
-                new_inv = order_sudo.action_create_invoice()
+                new_inv = order_sudo.action_create_invoice_po_v14(order_sudo)
                 if new_inv:
                     new_inv.l10n_mx_edi_cfdi_uuid = validacion[1] #no esta funcionando en v13
                     new_inv.date = validacion[2]
@@ -112,6 +112,7 @@ class CustomerPortal(CustomerPortal):
                             'type': 'binary'
                         })
                     order_sudo.invoice_status = 'invoiced'
+                    new_inv.l10n_mx_edi_cfdi_name = validacion[1] + '.xml'
                 values['upload_status_msg'] = 'Correcto'
         else:
             values['upload_status_msg'] = errores
@@ -126,7 +127,6 @@ class CustomerPortal(CustomerPortal):
 
     def validar_xml_portal(self, arch_xml, purch_order_rec):
         try:
-            cadena = arch_xml.decode('utf-8')
             xml_tree = objectify.fromstring(arch_xml)
         except:
             try:
@@ -136,8 +136,10 @@ class CustomerPortal(CustomerPortal):
                 xml_tree = objectify.fromstring(cadena)
             except:
                 return (True, 'El archivo xml no tiene una estructura válida. cont: %s.' % str(arch_xml)[:30])
-        if cadena.find('pago20:DoctoRelacionado') > 0 or cadena.find('pago10:DoctoRelacionado') > 0:
-            return (True, 'El cfdi es un complemento de pago, no una factura. Para subir un cfdi de pago vaya al menú que corresponde.')
+        tipo_cfdi = xml_tree.get('TipoDeComprobante', 'F').upper()
+        if tipo_cfdi != 'I':
+            tipos_cfdi = {'P': 'un complemento de pago', 'E': 'una nota de crédito', 'T': 'una Carta Porte', 'N': 'de nómina', 'F': 'inválido'}
+            return (True, 'El CFDI no es una factura, es %s. Verifique que el archivo a subir es el correcto.' % tipos_cfdi.get(tipo_cfdi))
         errores = ''
         conteoe = 0
         if hasattr(xml_tree, 'Emisor') and hasattr(xml_tree, 'Receptor'):
@@ -146,21 +148,20 @@ class CustomerPortal(CustomerPortal):
             if purch_order_rec.partner_id.vat and (purch_order_rec.partner_id.vat.upper() != rfc_emisor):
                 errores += '\n -El RFC del proveedor del xml no coincide con el del sistema. (%s vs %s) '%(rfc_emisor, purch_order_rec.partner_id.vat)
                 conteoe += 1
-            rfc_local = purch_order_rec.company_id.vat or 'sin rfc'
-            if rfc_local.upper() != rfc_receptor:
+            if purch_order_rec.company_id.vat.upper() != rfc_receptor:
                 errores += '\n -El RFC del receptor del xml no coincide con el del sistema. (%s vs %s) '%(rfc_receptor, purch_order_rec.company_id.vat)
                 conteoe += 1
         else:
             return (True, 'El archivo xml no contiene los nodos de emisor y receptor.')
         #termina analisis de rfcs, continua analisis de monto
-        monto_xml = float(xml_tree.attrib['Total'])
+        monto_xml = float(xml_tree.get('Total', 0))
         monto_orden = purch_order_rec.amount_total
         #if monto_orden != monto_xml:
         if not (monto_xml >= monto_orden - 0.5 and monto_xml <= monto_orden + 0.5):
             errores += '\n -El monto del xml no coincide con el total de la orden de compra. (%s vs %s) ' % (monto_xml, monto_orden)
             conteoe += 1
         #comienza chequeo de que sea un producto aceptable
-        product_sat_obj = request.env['product.unspsc.code']
+        product_sat_obj = request.env['l10n_mx_edi.product.sat.code']
         aceptados = product_sat_obj.search([('aceptable', '=', True)])
         lista_codigos = [x.code for x in aceptados]
         for e in xml_tree.findall('.//'):
@@ -170,20 +171,23 @@ class CustomerPortal(CustomerPortal):
                     errores += '\n -El codigo de producto %s no es aceptado por nuestra compañía. '%claveprod
                     conteoe += 1
         #fin analisis de productos
-        fecha_factura = DT.strptime(xml_tree.attrib['Fecha'][:10], '%Y-%m-%d')
-        metodopago = xml_tree.attrib['MetodoPago']
+        fecha_factura = DT.strptime(xml_tree.get('Fecha', 'Sin nodo fecha')[:10], '%Y-%m-%d')
+        metodopago = xml_tree.get('MetodoPago', 'Ninguno')
         if metodopago.upper() != 'PPD':
             errores += '\n -La factura no tiene el método de pago PPD (encontrado: %s)' % metodopago
             conteoe += 1
         #comienza chequeo de existencia del uuid
         acc_move_obj = request.env['account.move']
         tfd_node = self.get_node(xml_tree, 'tfd:TimbreFiscalDigital[1]', {'tfd': 'http://www.sat.gob.mx/TimbreFiscalDigital'},)
-        uuid_factura = tfd_node.attrib['UUID']
+        uuid_factura = tfd_node.get('UUID')
+        if not uuid_factura:
+            errores += '\n No se encontró el folio fiscal UUID en el archivo, verificar que sea el correcto.'
+            conteoe += 1
         try:
             nombre_arch = xml_tree.attrib['Serie'] + xml_tree.attrib['Folio']
         except:
             nombre_arch = uuid_factura
-        facturas_cargadas = acc_move_obj.search([('l10n_mx_supplier_cfdi_uuid', '=', uuid_factura), ('move_type', '=', 'in_invoice')])
+        facturas_cargadas = acc_move_obj.search([('l10n_mx_supplier_cfdi_uuid', '=', uuid_factura), ('type', '=', 'in_invoice')])
         if facturas_cargadas:
             for factura in facturas_cargadas:
                 errores += '\n -El UUID %s ya fue cargado en la factura %s.' % (uuid_factura, factura.name)
@@ -210,11 +214,11 @@ class CustomerPortal(CustomerPortal):
         fecha_limite = fields.Date.today() - relativedelta(day=1, hour=0, minute=0, second=0, microsecond=0)  # busca el mes anterior
         if partner.exigir_complemento:
             pagos_sin_rep = pagos_obj.search(
-                [('date', '<', fecha_limite.strftime(DF)), ('partner_id', '=', partner.id),
+                [('payment_date', '<', fecha_limite.strftime(DF)), ('partner_id', '=', partner.id),
                  ('state', '=', 'posted'), ('partner_type', '=', 'supplier'), ('estado_rep_cfdi', '!=','cargado')])
             for pago in pagos_sin_rep:
                 if fields.Datetime.now() > fields.Date.today() - relativedelta(day=11, hour=0, minute=0): #dia 5 del mes
-                    return 'El proveedor tiene complementos de pago sin subir del mes anterior. (%s)' % pago.ref
+                    return 'El proveedor tiene complementos de pago sin subir del mes anterior. (%s)' % pago.communication
         return None
 
     ###subir complemento de pago
@@ -239,11 +243,15 @@ class CustomerPortal(CustomerPortal):
             # fin analisis de pdf, comienza xml
             file = post.get('adjunto_xml')
             attachment = file.read()
+            #mimetype = guess_mimetype(base64.b64decode(base64.encodebytes(attachment)))
+            #if mimetype in File_xml_type: #la validacion ya la hace metodo validar xml pago
             validacion = self.validar_xml_pago(attachment, order_sudo)
             if validacion[0]:
                 errores += 'Error en xml! ' + validacion[1]
             else:
                 para_escribir['ultimo_xml'] = base64.encodebytes(attachment)
+            #except:
+            #    errores += 'Error de usuario! El archivo .xml no es un archivo .xml válido.'
         else:
             errores += 'Error de usuario! Ambos archivos son requeridos al adjuntar.'
         # parte final
@@ -270,8 +278,8 @@ class CustomerPortal(CustomerPortal):
                     })
                 values['upload_status_msg'] = 'Correcto'
                 order_sudo.write({'estado_rep_cfdi': 'cargado',
-                                  'l10n_mx_edi_cfdi_uuid': validacion[3],
-                                  'l10n_mx_edi_sat_status': 'undefined'})
+                                  'l10n_mx_edi_cfdi_name': validacion[3] + '.xml',
+                                  'l10n_mx_edi_pac_status': 'retry'})
         else:
             values['upload_status_msg'] = errores
         return request.render('portal_imjm.portal_my_pago', values)
@@ -279,7 +287,6 @@ class CustomerPortal(CustomerPortal):
     def validar_xml_pago(self, arch_xml, acc_paymnt_rec):
         try:
             xml_tree = objectify.fromstring(arch_xml)
-            cadena = arch_xml.decode('utf-8')
         except:
             try:
                 cadena = arch_xml.decode('utf-8')
@@ -288,8 +295,10 @@ class CustomerPortal(CustomerPortal):
                 xml_tree = objectify.fromstring(cadena)
             except:
                 return (True, 'El archivo xml no tiene una estructura válida. cont: %s.' % str(arch_xml)[:30])
-        if cadena.find('pago20:DoctoRelacionado') < 0 and cadena.find('pago10:DoctoRelacionado') < 0:
-            return ( True, 'El CFDI de pago no tiene el nodo de pagos, verifique que el archivo a subir es el correcto.')
+        tipo_cfdi = xml_tree.get('TipoDeComprobante', 'F').upper()
+        if tipo_cfdi != 'P':
+            tipos_cfdi = {'I': 'una factura', 'E': 'una nota de crédito', 'T': 'una Carta Porte', 'N': 'de nómina', 'F': 'inválido'}
+            return (True, 'El CFDI no es de pagos, es %s. Verifique que el archivo a subir es el correcto.'%tipos_cfdi.get(tipo_cfdi))
         conteoe = 0
         errores = ''
         if hasattr(xml_tree, 'Emisor') and hasattr(xml_tree, 'Receptor'):
@@ -307,16 +316,16 @@ class CustomerPortal(CustomerPortal):
         monto_xml = 0
         for e in xml_tree.findall('.//'):
             if e.tag == "{http://www.sat.gob.mx/Pagos}Pago" or e.tag == "{http://www.sat.gob.mx/Pagos20}Pago":  # version 1.0
-                monto_xml = float(e.attrib['Monto'])
-                fecha_pago = DT.strptime(e.attrib['FechaPago'][:10], '%Y-%m-%d')
-                forma_pagop = e.attrib['FormaDePagoP']
+                monto_xml = float(e.get('Monto'))
+                fecha_pago = DT.strptime(e.get('FechaPago', 'Error fecha')[:10], '%Y-%m-%d')
+                forma_pagop = e.get('FormaDePagoP')
                 lineas_pago = e.getchildren()
         monto_orden = acc_paymnt_rec.amount
         if monto_orden != monto_xml:
             errores += '\n -El monto del xml no coincide con el total del pago. (%s vs %s)' % (monto_xml, monto_orden)
             conteoe += 1
-        if fecha_pago.strftime('%Y-%m-%d') != acc_paymnt_rec.date.strftime('%Y-%m-%d'):
-            errores += '\n -La fecha del xml no coincide con la del pago. (%s vs %s)' % (fecha_pago, acc_paymnt_rec.date)
+        if fecha_pago.strftime('%Y-%m-%d') != acc_paymnt_rec.payment_date.strftime('%Y-%m-%d'):
+            errores += '\n -La fecha del xml no coincide con la del pago. (%s vs %s)' % (fecha_pago, acc_paymnt_rec.payment_date)
             conteoe += 1
         forma_pago_odoo = acc_paymnt_rec.l10n_mx_edi_payment_method_id.code
         if forma_pagop != forma_pago_odoo:
@@ -325,7 +334,7 @@ class CustomerPortal(CustomerPortal):
         #uuid_factura = acc_paymnt_rec.communication
         uuid_factura = ''
         facturas_sin_uuid = ''
-        for linea in acc_paymnt_rec.reconciled_bill_ids:
+        for linea in acc_paymnt_rec.reconciled_invoice_ids:
             if not linea.l10n_mx_edi_cfdi_uuid:
                 facturas_sin_uuid = facturas_sin_uuid + linea.name + ' '
                 conteoe += 1
@@ -339,9 +348,15 @@ class CustomerPortal(CustomerPortal):
                 if pagol.get('IdDocumento').upper() not in uuid_factura.upper():
                     errores += '\n -El uuid pagado del xml no coincide con la de la factura. (%s vs %s)' % (pagol.attrib['IdDocumento'], uuid_factura)
                     conteoe += 1
+        if not lineas_pago:
+            errores += '\n -El complemento de pago no tiene ninguna factura a la que se le esté aplicando el pago, por favor vuelva a generar su complemento de pago.'
+            conteoe += 1
         #fin de validaciones
         tfd_node = self.get_node(xml_tree, 'tfd:TimbreFiscalDigital[1]', {'tfd': 'http://www.sat.gob.mx/TimbreFiscalDigital'},)
-        uuid_factura = tfd_node.attrib['UUID']
+        uuid_factura = tfd_node.get('UUID')
+        if not uuid_factura:
+            errores += '\n No se encontró el folio fiscal UUID del CFDI, por favor revise que sea el archivo correcto'
+            conteoe += 1
         try:
             nombre_arch = xml_tree.attrib['Serie'] + xml_tree.attrib['Folio']
         except:

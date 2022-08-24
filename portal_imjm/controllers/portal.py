@@ -14,37 +14,40 @@ from odoo.addons.web.controllers.main import Binary
 
 class CustomerPortal(CustomerPortal):
 
-    def _prepare_home_portal_values(self, counters):
-        values = super(CustomerPortal, self)._prepare_home_portal_values(counters)
+    def _prepare_home_portal_values(self):
+        values = super(CustomerPortal, self)._prepare_home_portal_values()
         #if 'pagos_count' in counters:
         partner_id = request.env.user.partner_id.parent_id and request.env.user.partner_id.parent_id.id or request.env.user.partner_id.id
         if not request.env.user.has_group('base.group_portal'):
-            values['pagos_count'] = request.env['account.payment'].sudo(True).search_count([('payment_type', '=', 'outbound'), ('state', '!=', 'cancel')])
+            values['pagos_count'] = request.env['account.payment'].search_count([('payment_type', '=', 'outbound'), ('state', '!=', 'cancel')])
         else:
-            values['pagos_count'] = request.env['account.payment'].sudo(True).search_count([('payment_type', '=', 'outbound'), ('partner_id', '=', partner_id), ('state', '!=', 'cancel')])
-        values['purchase_count'] = request.env['purchase.order'].search_count([('state', 'in', ['purchase', 'done', 'draft']), ('approval', '=', True)]) if request.env['purchase.order'].check_access_rights('read', raise_exception=False) else 0
+            values['pagos_count'] = request.env['account.payment'].search_count([('payment_type', '=', 'outbound'), ('partner_id', '=', partner_id), ('state', '!=', 'cancel')])
+        dominio_compras = [('release_date', 'not in', False), ('state', 'in', ['purchase', 'done', 'draft']),
+                           ('approval', '=', True), ('invoice_status', '!=', 'invoiced')]
+        values['purchase_count'] = request.env['purchase.order'].search_count(dominio_compras) if request.env[
+            'purchase.order'].check_access_rights('read', raise_exception=False) else 0
         return values
 
     def _account_payment_get_page_view_values(self, payment, access_token, **kwargs):
         #
-        #def resize_to_48(b64source):
+        # def resize_to_48(b64source):
         #    if not b64source:
         #        b64source = base64.b64encode(Binary.placeholder())
         #    return image_process(b64source, size=(48, 48))
 
         values = {
             'order': payment,
-            #'resize_to_48': resize_to_48,
+            # 'resize_to_48': resize_to_48,
         }
         return self._get_page_view_values(payment, access_token, values, 'my_pago_history', False, **kwargs)
 
-    #sobreescribir funcion de lista de purchase orders
+        # sobreescribir funcion de lista de purchase orders
+
     @http.route(['/my/purchase', '/my/purchase/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_purchase_orders(self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, **kw):
         values = self._prepare_portal_layout_values()
         PurchaseOrder = request.env['purchase.order']
-        domain = []
-        #domain = ['release_date', 'not in', False] #en caso de que no les guste ver vacios
+        domain = [('approval', '=', True), ('release_date', 'not in', False), ('invoice_status', '!=', 'invoiced')]
         archive_groups = self._get_archive_groups('purchase.order', domain) if values.get('my_details') else []
         if date_begin and date_end:
             domain += [('create_date', '>', date_begin), ('create_date', '<=', date_end)]
@@ -116,7 +119,7 @@ class CustomerPortal(CustomerPortal):
     @http.route(['/my/pago', '/my/pago/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_pagos(self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, **kw):
         values = self._prepare_portal_layout_values()
-        AccountPayment = request.env['account.payment'].sudo(True)
+        AccountPayment = request.env['account.payment']
         partner_id = request.env.user.partner_id.parent_id and request.env.user.partner_id.parent_id.id or request.env.user.partner_id.id
         if not request.env.user.has_group('base.group_portal'):
             domain = []
