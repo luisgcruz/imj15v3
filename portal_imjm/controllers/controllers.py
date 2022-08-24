@@ -13,7 +13,7 @@ from datetime import datetime as DT
 File_Type = ['application/pdf']  # allowed file type
 File_xml_type = ['image/svg+xml']  # tipo xml
 
-CustomerPortal.OPTIONAL_BILLING_FIELDS.append('valid_until',)
+CustomerPortal.OPTIONAL_BILLING_FIELDS.append('valid_until')
 CustomerPortal.OPTIONAL_BILLING_FIELDS.append('partner')
 CustomerPortal.OPTIONAL_BILLING_FIELDS.append('attachment')
 CustomerPortal.OPTIONAL_BILLING_FIELDS.append('estado_opinion')
@@ -88,7 +88,7 @@ class CustomerPortal(CustomerPortal):
             if order_sudo.invoice_status == 'invoiced':
                 values['upload_status_msg'] = 'Error de usuario! El pedido de compra ya cuenta con una factura activa previa.'
             else:
-                new_inv = order_sudo.action_create_invoice_po_v14(order_sudo)
+                new_inv = order_sudo.action_create_invoice()
                 if new_inv:
                     new_inv.l10n_mx_edi_cfdi_uuid = validacion[1] #no esta funcionando en v13
                     new_inv.date = validacion[2]
@@ -161,7 +161,7 @@ class CustomerPortal(CustomerPortal):
             errores += '\n -El monto del xml no coincide con el total de la orden de compra. (%s vs %s) ' % (monto_xml, monto_orden)
             conteoe += 1
         #comienza chequeo de que sea un producto aceptable
-        product_sat_obj = request.env['l10n_mx_edi.product.sat.code']
+        product_sat_obj = request.env['product.unspsc.code']
         aceptados = product_sat_obj.search([('aceptable', '=', True)])
         lista_codigos = [x.code for x in aceptados]
         for e in xml_tree.findall('.//'):
@@ -187,7 +187,7 @@ class CustomerPortal(CustomerPortal):
             nombre_arch = xml_tree.attrib['Serie'] + xml_tree.attrib['Folio']
         except:
             nombre_arch = uuid_factura
-        facturas_cargadas = acc_move_obj.search([('l10n_mx_supplier_cfdi_uuid', '=', uuid_factura), ('type', '=', 'in_invoice')])
+        facturas_cargadas = acc_move_obj.search([('l10n_mx_supplier_cfdi_uuid', '=', uuid_factura), ('move_type', '=', 'in_invoice')])
         if facturas_cargadas:
             for factura in facturas_cargadas:
                 errores += '\n -El UUID %s ya fue cargado en la factura %s.' % (uuid_factura, factura.name)
@@ -214,11 +214,11 @@ class CustomerPortal(CustomerPortal):
         fecha_limite = fields.Date.today() - relativedelta(day=1, hour=0, minute=0, second=0, microsecond=0)  # busca el mes anterior
         if partner.exigir_complemento:
             pagos_sin_rep = pagos_obj.search(
-                [('payment_date', '<', fecha_limite.strftime(DF)), ('partner_id', '=', partner.id),
+                [('date', '<', fecha_limite.strftime(DF)), ('partner_id', '=', partner.id),
                  ('state', '=', 'posted'), ('partner_type', '=', 'supplier'), ('estado_rep_cfdi', '!=','cargado')])
             for pago in pagos_sin_rep:
                 if fields.Datetime.now() > fields.Date.today() - relativedelta(day=11, hour=0, minute=0): #dia 5 del mes
-                    return 'El proveedor tiene complementos de pago sin subir del mes anterior. (%s)' % pago.communication
+                    return 'El proveedor tiene complementos de pago sin subir del mes anterior. (%s)' % pago.ref
         return None
 
     ###subir complemento de pago
@@ -324,8 +324,8 @@ class CustomerPortal(CustomerPortal):
         if monto_orden != monto_xml:
             errores += '\n -El monto del xml no coincide con el total del pago. (%s vs %s)' % (monto_xml, monto_orden)
             conteoe += 1
-        if fecha_pago.strftime('%Y-%m-%d') != acc_paymnt_rec.payment_date.strftime('%Y-%m-%d'):
-            errores += '\n -La fecha del xml no coincide con la del pago. (%s vs %s)' % (fecha_pago, acc_paymnt_rec.payment_date)
+        if fecha_pago.strftime('%Y-%m-%d') != acc_paymnt_rec.date.strftime('%Y-%m-%d'):
+            errores += '\n -La fecha del xml no coincide con la del pago. (%s vs %s)' % (fecha_pago, acc_paymnt_rec.date)
             conteoe += 1
         forma_pago_odoo = acc_paymnt_rec.l10n_mx_edi_payment_method_id.code
         if forma_pagop != forma_pago_odoo:
@@ -334,7 +334,7 @@ class CustomerPortal(CustomerPortal):
         #uuid_factura = acc_paymnt_rec.communication
         uuid_factura = ''
         facturas_sin_uuid = ''
-        for linea in acc_paymnt_rec.reconciled_invoice_ids:
+        for linea in acc_paymnt_rec.reconciled_bill_ids:
             if not linea.l10n_mx_edi_cfdi_uuid:
                 facturas_sin_uuid = facturas_sin_uuid + linea.name + ' '
                 conteoe += 1
