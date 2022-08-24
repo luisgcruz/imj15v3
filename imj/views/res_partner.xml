@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    <record id="partner_imj_inherit" model="ir.ui.view">
+        <field name="name">partner.imj.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <field name="vat" position="after">
+                <field name="valid_rfc"/>
+            </field>
+            <field name="vat" position="replace">
+                <field name="vat" string="RFC" placeholder="e.g. BE0477472701" attrs="{'readonly': [('parent_id','!=',False)], 'required':[('valid_rfc','=',True)] }"/>
+            </field>
+        </field>
+    </record>
+
+</data>
+
+</odoo>

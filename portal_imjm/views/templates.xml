@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Modificacion vista partner-->
+    <template id="portal_imjm_template_partner" inherit_id="portal.portal_my_details">
+        <xpath expr="//div[hasclass('o_portal_details')]" position="after">
+            <div class="row">
+                <div t-attf-class="form-group #{error.get('valid_until') and 'o_has_error' or ''} col-xl-6">
+                    <label class="col-form-label" for="name">Estado de la validez y fecha de renovación de la Opinión del SAT</label>
+                    <input type="text" readonly="1" name="estado_opinion" t-attf-class="form-control #{error.get('estado_opinion') and 'is-invalid' or ''}" t-att-value="estado_opinion or partner.estado_opinion"/>
+                    <input type="text" readonly="1" name="opinion_msg_stat" t-attf-class="form-control #{error.get('opinion_msg_stat') and 'is-invalid' or ''}" t-att-value="opinion_msg_stat or partner.opinion_msg_stat"/>
+                    <input type="text" readonly="1" name="valid_until" t-attf-class="form-control #{error.get('valid_until') and 'is-invalid' or ''}" t-att-value="valid_until or partner.valid_until" />
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//input[@name='name']" position="replace">
+            <input type="text" name="name" t-attf-class="form-control #{error.get('name') and 'is-invalid' or ''}" t-att-value="name or partner.name" t-att-readonly="1"/>
+        </xpath>
+        <xpath expr="//input[@name='company_name']" position="replace">
+            <input type="text" name="company_name" t-attf-class="form-control #{error.get('company_name') and 'is-invalid' or ''}" t-att-value="company_name or partner.commercial_company_name" t-att-readonly="1"/>
+        </xpath>
+        <xpath expr="//input[@name='vat']" position="replace">
+            <input type="text" name="vat" t-attf-class="form-control #{error.get('vat') and 'is-invalid' or ''}" t-att-value="vat or partner.vat" t-att-readonly="1" t-att-title="vat_not_editable_message"/>
+        </xpath>
+        <xpath expr="//input[@name='street']" position="replace">
+            <input type="text" name="street" t-attf-class="form-control #{error.get('street') and 'is-invalid' or ''}" t-att-value="street or partner.street" t-att-readonly="1"/>
+        </xpath>
+        <xpath expr="//input[@name='city']" position="replace">
+            <input type="text" name="city" t-attf-class="form-control #{error.get('city') and 'is-invalid' or ''}" t-att-value="city or partner.city" t-att-readonly="1"/>
+        </xpath>
+        <xpath expr="//input[@name='zipcode']" position="replace">
+            <input type="text" name="zipcode" t-attf-class="form-control #{error.get('zip') and 'is-invalid' or ''}" t-att-value="zipcode or partner.zip" t-att-readonly="1"/>
+        </xpath>
+        <xpath expr="//select[@name='country_id']" position="replace">
+            <input type="text" name="country_id" t-attf-class="form-control #{error.get('country_id') and 'is-invalid' or ''}" t-att-value="country_id or partner.country_id.name" t-att-readonly="1"/>
+        </xpath>
+        <xpath expr="//select[@name='state_id']" position="replace">
+            <input type="text" name="state_id" t-attf-class="form-control #{error.get('state_id') and 'is-invalid' or ''}" t-att-value="state_id or partner.state_id.name" t-att-readonly="1"/>
+        </xpath>
+        <xpath expr="/t/t/form" position="after">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form action="/upload/opinion/" method="post" enctype="multipart/form-data" id="file_upload_form">
+                        <input type="hidden" name="partner" t-att-value="partner.id"/>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Subir PDF de opinion del SAT</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="file" name="attachment" class="file" multiple="false"
+                                   data-show-upload="true" data-show-caption="true" data-show-preview="true"
+                                   id="opinion"/>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary  ">
+                                Subir
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    <!-- Modificacion vista purchase order list-->
+    <template id="portal_imjm_template_purchase_order_list" inherit_id="purchase.portal_my_purchase_orders">
+        <xpath expr="//t/t/thead/tr/th[3]" position="after">
+            <th>Fecha de Liberación</th>
+            <th>Estado de la factura</th>
+        </xpath>
+        <xpath expr="//t/t/t/tr" position="replace">
+            <t t-if="order.release_date"><!-- analizar tambien que el invoice status NO sea facturado-->
+                <t t-if="order.approval is True">
+                    <t t-if="order.invoice_status != 'invoiced'">
+                        <tr t-if="order.release_date &lt;= order.release_date.today() + relativedelta(day=1, months=1, days=-1)">
+                            <td>
+                                <a t-att-href="order.get_portal_url()">
+                                    <t t-esc="order.name"/>
+                               </a>
+                            </td>
+                            <td class="text-center">
+                                <span t-field="order.date_approve"/>
+                            </td>
+                            <td>
+                            </td>
+                            <td>
+                                <span t-field="order.release_date"/>
+                            </td>
+                            <td>
+                                <t t-if="order.state_invoice_portal is not False">
+                                    <span t-field="order.state_invoice_portal"/>
+                                </t>
+                                <t t-else="">
+                                    <span class="text-center"> Sin Factura</span>
+                                </t>
+                                <t t-if="order.state == 'cancel'">
+                                    <span class="badge badge-pill badge-warning"><i class="fa fa-fw fa-remove" aria-label="Cancelled" title="Cancelled" role="img"/><span class="d-none d-md-inline"> Cancelada</span></span>
+                                </t>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="order.amount_total" t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
+                            </td>
+                        </tr>
+                    </t>
+                </t>
+            </t>
+        </xpath>
+    </template>
+    <!-- Modificacion vista purchase order form-->
+    <template id="portal_imjm_template_purchase_order_form" inherit_id="purchase.portal_my_purchase_order">
+        <xpath expr="//div[@id='purchase_order_communication']" position="before" id="div_subir_adjuntos">
+            <form action="/upload/archivos_factura/" method="post" enctype="multipart/form-data" id="file_upload_purchase_order_form">
+                <div id="purchase_order_subir_facturas" class="card-body">
+                    <div t-att-class="'d-inline'">
+                        <strong>Estado de la facturación: </strong> <span class="ml-1" t-field="order.state_invoice_portal"/>
+                    </div><br/>
+                    <t t-if="order.state_invoice_portal not in ['revision','aceptado']">
+                        <input type="hidden" name="orden_id" t-att-value="order.id"/>
+                        <h4>    Adjuntar Factura .pdf</h4>
+                        <input type="file" name="adjunto_pdf" class="file" multiple="false" id="adjunto_pdf"
+                                           data-show-upload="true" data-show-caption="true" data-show-preview="true"/>
+                        <h4>    Adjuntar Factura .xml</h4>
+                        <input type="file" name="adjunto_xml" class="file" multiple="false" id="adjunto_xml"
+                                           data-show-upload="true" data-show-caption="true" data-show-preview="true"/>
+                        <br/>
+                        <br/>
+                        <span><button type="submit" class="btn btn-primary  ">Subir</button></span>
+                        <br/>
+                    </t>
+                    <t t-if="upload_status_msg and 'Error' in upload_status_msg">
+                        <textarea t-if="upload_status_msg" t-esc="upload_status_msg" t-att-rows="4" style="font-size: 1.1rem;border-color: #dc3545; background-color:#e9ecef"
+                        cols="50" autofocus="1" readonly="1"/>
+                    </t>
+                    <t t-if="upload_status_msg and upload_status_msg == 'Correcto'">
+                        <label class="col-form-label">Archivos subidos con éxito</label>
+                    </t>
+                </div>
+            </form>
+        </xpath>
+    </template>
+    <template id="portal_imjm_template_purchase_order_content" inherit_id="purchase.purchase_order_portal_content">
+        <xpath expr="//div[@id='total']" position="replace">
+            <div id="total" t-if="order.state not in ['cancel']" class="row" name="total2" style="page-break-inside: avoid;">
+                <div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'} ml-auto">
+                    <t t-call="purchase.purchase_order_portal_content_totals_table"/>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    <!-- Eliminar elementos sobrantes de la lista home del portal-->
+    <template id="purchase.portal_my_home_purchase" name="Show Requests for Quotation / Purchase Orders" customize_show="True" inherit_id="portal.portal_my_home" priority="25">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Compras</t>
+                <t t-set="url" t-value="'/my/purchase'"/>
+                <t t-set="placeholder_count" t-value="'purchase_count'"/>
+            </t>
+        </xpath>
+      </template>
+    <template id="sale.portal_my_home_sale" name="Show Quotations / Sales Orders" customize_show="True" inherit_id="portal.portal_my_home" priority="20">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <div></div>
+        </xpath>
+    </template>
+    <!-- Agregar menuitem-->
+    <template id="portal_my_home_menu_pagos" name="Portal layout : pagos menu entries" inherit_id="portal.portal_breadcrumbs" priority="30">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'pagos' or account_payment" t-attf-class="breadcrumb-item #{'active ' if not account_payment else ''}">
+                <a t-if="account_payment" t-attf-href="/my/pago?{{ keep_query() }}">Pagos de proveedor</a>
+                <t t-else="">Pagos proveedor</t>
+            </li>
+            <li t-if="account_payment" class="breadcrumb-item active">
+                <t t-esc="account_payment.name"/>
+            </li>
+        </xpath>
+    </template>
+    <template id="portal_my_home_pagos" name="Pagos de proveedor" inherit_id="portal.portal_my_home" priority="50">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Pagos de proveedor</t>
+                <t t-set="url" t-value="'/my/pago'"/>
+                <t t-set="placeholder_count" t-value="'pagos_count'"/>
+            </t>
+        </xpath>
+    </template>
+    <!-- Agregar vista list pagos-->
+    <template id="portal_my_pagos" name="Portal: Mis Pagos">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar"/>
+            <t t-if="orders" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Pago ref</th>
+                        <th class="text-right">Fecha</th>
+                        <th>Cliente</th>
+                        <th class="text-right">Total</th>
+                        <th>Complemento de pago</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="orders" t-as="order">
+                        <tr>
+                            <td>
+                                <a t-att-href="order.get_portal_url()">
+                                    <t t-esc="order.name"/>
+                                </a>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="order.date"/>
+                            </td>
+                            <td>
+                                <t t-esc="order.partner_id.name"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="order.amount" t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
+                            </td>
+                            <td>
+                                <t t-esc="order.estado_rep_cfdi"/>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </t>
+        </t>
+    </template>
+    <!-- Agregar vista form pagos-->
+    <template id="portal_my_pago" name="Portal: Mi Pago">
+        <t t-call="portal.portal_layout">
+            <t t-set="account_payment" t-value="order"/>
+            <div id="optional_placeholder"></div>
+            <div class="container">
+                <div class="row mt16 o_portal_purchase_sidebar">
+                  <!-- Sidebar -->
+                  <t t-call="portal.portal_record_sidebar">
+                    <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+                      <t t-set="title">
+                        <h2 class="mb-0">
+                          <b t-field="account_payment.amount" data-id="total_amount"/>
+                        </h2>
+                      </t>
+                    <t t-set="entries">
+                      <ul class="list-group list-group-flush flex-wrap flex-row flex-lg-column">
+                        <li class="list-group-item flex-grow-1">
+                          <div class="o_download_pdf btn-toolbar flex-sm-nowrap">
+                            <div class="btn-group flex-grow-1 mr-1 mb-1">
+                              <a class="btn btn-secondary btn-block o_download_btn"                       t-att-href="account_payment.get_portal_url(report_type='pdf', download=True)" title="Download"><i class="fa fa-download"/> Descargar</a>
+                            </div>
+                            <div class="btn-group flex-grow-1 mb-1">
+                                <a class="btn btn-secondary btn-block o_print_btn o_portal_invoice_print" t-att-href="account_payment.get_portal_url(report_type='pdf')" id="print_invoice_report" title="Print" target="_blank"><i class="fa fa-print"/> Imprimir</a>
+                            </div>
+                          </div>
+                        </li>
+
+                        <li t-if="account_payment.partner_id.user_id" class="list-group-item flex-grow-1">
+                          <div class="small mb-1">
+                            <strong class="text-muted">Contacto</strong>
+                          </div>
+                          <div class="row flex-nowrap">
+                            <div class="col flex-grow-0 pr-2">
+                              <img class="rounded-circle mr4 float-left o_portal_contact_img" t-if="account_payment.partner_id.user_id.image_1024" t-att-src="image_data_uri(account_payment.partner_id.user_id.image_1024)" alt="Contact"/>
+                              <img class="rounded-circle mr4 float-left o_portal_contact_img" t-if="not account_payment.partner_id.user_id.image_1024" src="/web/static/src/img/placeholder.png" alt="Contact"/>
+                            </div>
+                            <div class="col pl-0" style="min-width: 150px">
+                              <span t-field="account_payment.partner_id.user_id" t-options='{"widget": "contact", "fields": ["name", "phone"], "no_marker": True}'/>
+                              <a href="#discussion" class="small"><i class="fa fa-comment"></i> Send message</a>
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                    </t>
+                  </t>
+                  <!-- final del cuadrito de un lado con info de contacto -->
+                  <div class=" col-lg col-12 justify-content-end w-100">
+                    <div class= "card pb-5">
+                      <div class="card-header bg-white pb-1">
+                        <div class="row">
+                          <div class="col-lg-12">
+                            <h2 class="font-weight-normal">
+                                Pago de proveedor
+                              <span class="font-italic" t-esc="order.name"/>
+                            </h2>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="card-body">
+                          <div class="mb-4">
+                              <strong class="d-block mb-1">Pago de:</strong>
+                              <span t-field="order.partner_id.name"/><br/>
+                              <div t-att-class="'d-inline'">
+                                  <strong>Dia del pago: </strong><span class="ml-1" t-field="order.date" t-options='{"widget": "date"}'/>
+                              </div><br/>
+                              <div t-att-class="'d-inline'">
+                                  <strong>Monto total: </strong> <h3 class="font-weight-normal"><span t-field="order.amount" t-options='{"widget": "monetary", "display_currency": order.currency_id}'/> </h3>
+                              </div>
+                              <div t-att-class="'d-inline'">
+                                  <strong>Referencia factura: </strong> <span class="ml-1" t-field="order.ref"/>
+                              </div><br/>
+                              <div t-att-class="'d-inline'">
+                                  <strong>Forma de pago: </strong> <span class="ml-1" t-field="order.l10n_mx_edi_payment_method_id.name"/>
+                              </div><br/>
+                              <div t-att-class="'d-inline'">
+                                  <strong>Folio Fiscal: </strong> <span class="ml-1" t-field="order.l10n_mx_edi_cfdi_uuid"/>
+                              </div><br/>
+                              <div t-att-class="'d-inline'">
+                                  <strong>Estado de la carga del complemento: </strong> <span class="ml-1" t-field="order.estado_rep_cfdi"/>
+                              </div>
+                            </div>
+                        </div>
+                        <!-- Inicia Adjuntar complemento de pago -->
+                        <t t-if="order.estado_rep_cfdi not in ['cargado']">
+                            <form action="/upload/archivos_cpago/" method="post" enctype="multipart/form-data" id="file_upload_account_payment_form">
+                                <div id="account_payment_subir_complemento" class="card-body">
+                                    <input type="hidden" name="orden_id" t-att-value="order.id"/>
+                                    <h4>    Adjuntar Archivo PDF de Complemento de pago</h4>
+                                    <input type="file" name="adjunto_pdf" class="file" multiple="false" id="adjunto_pdf"
+                                                       data-show-upload="true" data-show-caption="true" data-show-preview="true"/>
+                                    <h4>    Adjuntar Archimo XML de Complemento de pago</h4>
+                                    <input type="file" name="adjunto_xml" class="file" multiple="false" id="adjunto_xml"
+                                                       data-show-upload="true" data-show-caption="true" data-show-preview="true"/>
+                                    <br/>
+                                    <br/>
+                                    <span><button type="submit" class="btn btn-primary  ">Subir</button></span>
+                                    <br/>
+                                    <t t-if="upload_status_msg and 'Error' in upload_status_msg">
+                                        <textarea t-if="upload_status_msg" t-esc="upload_status_msg" t-att-rows="4" style="font-size: 1.1rem;border-color: #dc3545; background-color:#e9ecef" cols="50" autofocus="1" readonly="1"/>
+                                    </t>
+                                    <t t-if="upload_status_msg and upload_status_msg == 'Correcto'">
+                                        <label class="col-form-label">Archivos subidos con éxito</label>
+                                    </t>
+                                </div>
+                            </form>
+                        </t>
+                        <!-- Fin Adjuntar complemento de pago -->
+                    </div>
+                    <div id="account_pago_communication" class="mt-4">
+                      <h2>History</h2>
+                      <t t-call="portal.message_thread">
+                        <t t-set="object" t-value="account_payment"/>
+                      </t>
+                    </div>
+                  </div>
+                </div>
+            </div>
+          <div class="oe_structure mb32"/>
+        </t>
+    </template>
+    <template id="portal_imjm_template_change_color_invoice" inherit_id="account.portal_my_invoices">
+        <xpath expr="//th[hasclass('d-md-table-cell')]" position="replace">
+            <th class='d-none d-md-table-cell'>Fecha de aprobación</th>
+        </xpath>
+        <xpath expr="//th[4]" position="replace">
+            <th class='d-none d-md-table-cell'>Estado del pago</th>
+        </xpath>
+        <xpath expr="//tbody/t/tr/td[4]" position="replace">
+            <td class="tx_status" style="color:black">
+                <t t-if="invoice.state == 'posted' and invoice.payment_state != 'paid'">
+                    <span class="badge badge-pill badge-info"><i class="fa fa-fw fa-clock-o" aria-label="Opened" title="Opened" role="img"/><span class="d-none d-md-inline"> Pendiente de pago</span></span>
+                </t>
+                <t t-if="invoice.state == 'posted' and invoice.payment_state == 'paid'">
+                    <span class="badge badge-pill badge-success"><i class="fa fa-fw fa-check" aria-label="Paid" title="Paid" role="img"/><span class="d-none d-md-inline"> Pagada</span></span>
+                </t>
+                <t t-if="invoice.state == 'cancel'">
+                    <span class="badge badge-pill badge-warning"><i class="fa fa-fw fa-remove" aria-label="Cancelled" title="Cancelled" role="img"/><span class="d-none d-md-inline"> Cancelada</span></span>
+                </t>
+                <t t-if="invoice.state == 'draft'">
+                    <span class="badge badge-pill badge-light"><i class="fa fa-book fa-fw" aria-hidden="true" aria-label="Draft" title="Draft" role="img"/><span class="d-none d-md-inline">En Revisión</span></span>
+                </t>
+            </td>
+        </xpath>
+    </template>
+    <template id="portal_imjm_template_change_contact" inherit_id="account.portal_invoice_page">
+        <xpath expr="//ul/li[2]" position="replace">
+            <li t-if="invoice.invoice_user_id" class="list-group-item flex-grow-1">
+                <div class="small mb-1"><strong class="text-muted">
+                    Contacto de soporte
+                </strong></div>
+                <div class="row">
+                    <div class="col flex-grow-0 pr-2">
+                        <img t-if="invoice.invoice_user_id.image_1024" class="rounded-circle mt-1 o_portal_contact_img" t-att-src="image_data_uri(invoice.invoice_user_id.image_1024)" alt="Contacto"/>
+                        <img t-else="" class="rounded-circle mt-1 o_portal_contact_img" src="/web/static/src/img/user_menu_avatar.png" alt="Contacto"/>
+                    </div>
+                    <div class="col pl-0">
+                        Equipo de Soporte<br/>
+                        <a href="#discussion" class="small"><i class="fa fa-fw fa-comments"/><b>Enviar Mensaje</b></a>
+                    </div>
+                </div>
+            </li>
+        </xpath>
+    </template>
+    <template id="portal_imjm_template_purchase_contact" inherit_id="purchase.portal_my_purchase_order">
+        <xpath expr="//ul/li[3]" position="replace">
+            <li t-if="order.user_id" class="list-group-item flex-grow-1">
+                <div class="small mb-1"><strong class="text-muted">Contacto de soporte</strong></div>
+                <div class="row flex-nowrap">
+                    <div class="col flex-grow-0 pr-2">
+                        <img class="rounded-circle mr4 float-left o_portal_contact_img" t-att-src="image_data_uri(order.user_id.avatar_1024)" alt="Contact"/>
+                    </div>
+                    <div class="col pl-0" style="min-width: 150px">
+                        Equipo de Soporte<br/>
+                        <a href="#discussion" class="small"><i class="fa fa-fw fa-comments"/><b>Enviar Mensaje</b></a>
+                    </div>
+                </div>
+            </li>
+        </xpath>
+    </template>
+</odoo>

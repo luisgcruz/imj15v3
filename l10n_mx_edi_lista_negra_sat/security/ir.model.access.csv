@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+acceso_lista_negra_sat_read,access lista negra sat read,model_res_partner_lista_negra,group_lista_negra_sat_read,1,0,1,0
+acceso_lista_negra_sat_write,access lista negra sat write,model_res_partner_lista_negra,group_lista_negra_sat_write,1,1,1,0
+acceso_lista_negra_sat_unlink,access lista negra sat unlink,model_res_partner_lista_negra,group_lista_negra_sat_unlink,1,1,1,1

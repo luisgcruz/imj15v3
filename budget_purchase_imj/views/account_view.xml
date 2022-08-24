@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+
+    <record id="crossovered_imj_inherit2" model="ir.ui.view">
+        <field name="name">crossovered.imj.inherit2</field>
+        <field name="model">crossovered.budget</field>
+        <field name="inherit_id" ref="account_budget.crossovered_budget_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='planned_amount']" position="before">
+              <field name="qty" />
+              <field name="price" />
+              <field name="duration" />
+            </xpath>
+            <xpath expr="//field[@name='practical_amount']" position="before">
+              <field string='Comprometido' name="amount_purchase" readonly="True" widget="monetary" sum="amount_purchase"/>
+            </xpath>
+            <xpath expr="//field[@name='company_id']" position="before">
+              <field  name="start_date" string='Inicio de Campaña'/>
+              <field  name="end_date" string='Fin de Campaña'/>
+            </xpath>
+            <xpath expr="//field[@name='theoritical_amount']" position="replace">
+            </xpath>            
+            <xpath expr="//field[@name='user_id']" position="after">
+
+                    <field  name="margen_planeed" /> 
+                    <field  name="margen_real"/> 
+
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_imj_inherit2" model="ir.ui.view">
+        <field name="name">purchase.imj.inherit2</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_rfq_send']" position="replace">
+              <button name="action_rfq_send" states="draft" string="ENVIAR POR CORREO ELECTRÓNICO" type="object" context="{'send_rfq':False}" class="oe_highlight"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="purchase_imj_inherit3" model="ir.ui.view">
+        <field name="name">purchase.imj.inherit3</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_unit']" position="replace">
+                <field  name="cost_edit" invisible="True"/>
+              <field name="price_unit" attrs="{'readonly': ['|',('invoice_lines', '!=', []),('cost_edit', '=', False)]}" force_save="True"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="categ_imj_inherit2" model="ir.ui.view">
+        <field name="name">categ.imj.inherit2</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='parent_id']" position="after">
+              <field  name="cost_edit"/> 
+              <field  name="limit_purchase" groups="budget_purchase_imj.group_purchase_approval"/> 
+              <field  name="users_aprov_ids"/> 
+              <field  name="users_limit_ids"/> 
+            </xpath>
+        </field>
+    </record>
+
+    <record id="prod_imj_inherit2" model="ir.ui.view">
+        <field name="name">prod.imj.inherit2</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='standard_price']" position="after">
+                <group>
+                    <newline/>
+                    <field  name="cost_edit"/> 
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</data>
+
+</odoo>

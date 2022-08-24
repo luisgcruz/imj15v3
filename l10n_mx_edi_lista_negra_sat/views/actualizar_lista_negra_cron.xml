@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding='UTF-8'?>
+<odoo>
+   
+    <record model="ir.cron" id="actualizar_lista_negra_cron">
+		<field name="name">Actualizar Lista Negra SAT</field>
+		<field name="model_id" ref="l10n_mx_edi_lista_negra_sat.model_res_partner_lista_negra"/>
+		<field name="interval_number">15</field>
+		<field name="interval_type">days</field>
+		<field name="numbercall">-1</field>
+		<field name="doall" eval="False"/>
+		<field name="state">code</field>
+		<field name="code">model._cron_sincronizar_lista_sat()</field>
+	</record>
+			
+</odoo>

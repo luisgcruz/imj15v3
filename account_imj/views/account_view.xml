@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Remove button to post the move if journal bool is true-->
+        <record id="account_hide_post_button" model="ir.ui.view">
+            <field name="name">account.hide.post.button</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_post'][2]" position="replace">
+                    <button name="action_post" string="Confirm" class="oe_highlight" type="object" groups="account.group_account_invoice" data-hotkey="v" attrs="{'invisible': ['|', '|', '|','|', ('state', '!=', 'draft'), ('auto_post', '=', True), ('move_type', '=', 'entry'), ('display_inactive_currency_warning','=',True), ('no_publicable','=',True)]}"/>
+                </xpath>
+				<xpath expr="//field[@name='partner_bank_id']" position="after">
+                    <field name="no_publicable" invisible="1"/>
+                </xpath>
+            </field>
+        </record>
+        
+        <record id="account_journal_nopublicable_view" model="ir.ui.view">
+            <field name="name">account.journal.nopublicable.view</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='type']" position="after">
+                    <field name="no_publicable" />
+                </xpath>
+            </field>
+        </record>
+	</data>
+</odoo>

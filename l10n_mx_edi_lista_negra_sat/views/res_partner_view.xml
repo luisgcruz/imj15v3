@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_partner_lista_negra_view" model="ir.ui.view">
+            <field name="name">res.partner.lista.negra.view</field>
+            <field name="model">res.partner</field>
+            <field name="priority">921</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='industry_id']" position="after">
+                    <field name="estado_listado_sat"/>
+	            </xpath>
+            </field>
+        </record>
+        <record id="res_partner_edi_lista_negra_search_view" model="ir.ui.view">
+            <field name="name">res.partner.edi.lista.negra.search.view</field>
+            <field name="model">res.partner</field>
+            <field name="priority">922</field>
+            <field name="inherit_id" ref="base.view_res_partner_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='inactive']" position="after">
+                    <filter string="Estado lista negra SAT" name="estado_listado_sat" domain="[('estado_listado_sat','!=','correcto')]"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="res_partner_edi_lista_negra_tree_view" model="ir.ui.view">
+            <field name="name">res.partner.edi.lista.negra.tree.view</field>
+            <field name="model">res.partner</field>
+            <field name="priority">923</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='country_id']" position="after">
+                    <field name="estado_listado_sat" optional="hide" readonly="1"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

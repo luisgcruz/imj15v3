@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+		<record id="producto_sat_aceptable_wizard_view" model="ir.ui.view">
+			<field name="name">producto.sat.aceptable.wizard.view</field>
+			<field name="model">product.sat.aceptable</field>
+			<field name="arch" type="xml">
+				<form string="Productos Aceptables">
+                    <field name="sat_code_aceptado_ids">
+						<tree editable="bottom" create="1" delete="1">
+							<field name="code"/>
+							<field name="name"/>
+						</tree>
+					</field>
+					<footer>
+						<button name="aceptar_estos_productos" string="Aceptar listados" type="object"/>
+					</footer>
+				</form>
+			</field>
+		</record>
+
+		<record id="producto_sat_aceptable_act_win" model="ir.actions.act_window">
+			<field name="name">Lista de Productos SAT aceptables</field>
+			<field name="res_model">product.sat.aceptable</field>
+			<field name="view_mode">form</field>
+			<field name="target">new</field>
+		</record>
+
+		<menuitem action="producto_sat_aceptable_act_win" id="menu_producto_sat_aceptable_wiz"
+			parent="purchase.menu_purchase_products" groups="portal_imjm.group_modificar_codigos_sat_aceptables"/>
+
+	</data>
+</odoo>
+ 

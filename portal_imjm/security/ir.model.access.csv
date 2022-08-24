@@ -1,0 +1,5 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+"wizard_aceptar_codigo_sat_admin","wizard.aceptar.codigo.sat.admin","portal_imjm.model_product_sat_aceptable","portal_imjm.group_modificar_codigos_sat_aceptables",1,1,1,1
+"access_account_payment_portal","account_payment group_portal","account.model_account_payment","base.group_portal",1,1,0,0
+"access_product_unspsc_code","acceso.portal.product.unspsc.code","product_unspsc.model_product_unspsc_code","base.group_portal",1,0,0,0
+"access_account_move_portal","acceso.account.move.portal","account.model_account_move","base.group_portal",1,0,0,0

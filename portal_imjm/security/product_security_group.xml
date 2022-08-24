@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+     <record id="group_modificar_codigos_sat_aceptables" model="res.groups">
+        <field name="name">Modficiar Códigos SAT Aceptables</field>
+    </record>
+
+</odoo>

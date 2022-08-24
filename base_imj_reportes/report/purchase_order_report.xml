@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="report_purchaseorder_document_imj" inherit_id="purchase.report_purchaseorder_document">
+        <!--budget purchase imj: visto bueno-->
+        <xpath expr="//t/div/h2[2]" position="replace">
+            <h2 t-if="o.approval == True">ORDEN DE COMPRA FINAL #<span t-field="o.name"/></h2>
+            <h2 t-if="o.approval == False">ORDEN DE COMPRA INICIAL #<span t-field="o.name"/></h2>
+        </xpath>
+        <xpath expr="//t/div/h2[1]" position="replace">
+        </xpath>
+        <xpath expr="//t/div/h2[3]" position="replace">
+        </xpath>
+        <!-- mes campaña
+        <xpath expr="//td[@id='product']" position="replace">
+			<td id="product2">
+                <span t-field="line.name"/>
+            </td>
+		</xpath>-->
+		<xpath expr="//th[@name='th_taxes']" position="replace">
+            <th name="th_campana"><strong>Campaña</strong></th>
+            <th name="th_mescampana"><strong>Mes Campaña</strong></th>
+        </xpath>
+		<xpath expr="//td[@name='td_taxes']" position="replace">
+            <td name="td_mescampana"><span t-field="line.account_analytic_id"/></td>
+            <td name="td_mescampana"><span t-field="line.mes_campana"/></td>
+		</xpath>
+    </template>
+</odoo>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="purchase_order_comercial_form_view" model="ir.ui.view">
+        <field name="name">purchase.order.comercial.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">904</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="supplier_ref" string="Nombre Comercial"/>
+           </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_comercial_tree_view" model="ir.ui.view">
+        <field name="name">purchase.order.comercial.tree.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">903</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="supplier_ref" optional="show"/>
+           </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_comercial2_tree_view" model="ir.ui.view">
+        <field name="name">purchase.order.comercial2.tree.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">902</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="supplier_ref" optional="show"/>
+           </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_comercial_search_view" model="ir.ui.view">
+        <field name="name">purchase.order.comercial.search.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">901</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='order_date']" position="after">
+                <field name="supplier_ref"/>
+                <group expand="0" string="Group By">
+                    <filter string="Nombre Comercial" name="supplier_ref" domain="[]" context="{'group_by': 'supplier_ref'}"/>
+                </group>
+           </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_comercial_presup_search_view" model="ir.ui.view">
+        <field name="name">purchase.order.comercial.presup.search.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">900</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='order_date']" position="after">
+                <field name="supplier_ref"/>
+                <group expand="0" string="Group By">
+                    <filter string="Nombre Comercial" name="supplier_ref" domain="[]" context="{'group_by': 'supplier_ref'}"/>
+                </group>
+           </xpath>
+        </field>
+    </record>
+</odoo>

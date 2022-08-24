@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+acceso_wizard_duplicar_oc_admin,access wizard duplicar OC read,model_wizard_duplicar_purchase_order,group_purchase_duplicar_oc,1,1,1,1

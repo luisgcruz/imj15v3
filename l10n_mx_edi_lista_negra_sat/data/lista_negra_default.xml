@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="lista_negra_sat_default" model="res.partner.lista.negra">
+        <field name="name">Lista negra default</field>
+        <field name="state">activo</field>
+    </record>
+</odoo>

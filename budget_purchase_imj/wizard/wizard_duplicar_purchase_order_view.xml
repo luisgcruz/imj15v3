@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="wiz_cam_form">
+            <field name="name">wizard duplicar purchase order form</field>
+            <field name="model">wizard.duplicar.purchase.order</field>
+            <field name="arch" type="xml">
+                <form string="Generar OC">
+                    <separator string="Crear OC desde una campaña:"/>
+                    <group>
+                        <field name="name" class="oe_inline"/>
+                        <field name="num" class="oe_inline"/>
+                    </group>
+
+                    <footer>
+                        <button name="run" string="Crear" type="object" class="btn-primary"/>
+                        <button class="btn-secondary" special="cancel" string="Cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_wizard_duplicar_oc_campanha" model="ir.actions.act_window">
+			<field name="name">Duplicar OC</field>
+			<field name="res_model">wizard.duplicar.purchase.order</field>
+			<field name="view_mode">form</field>
+			<field name="target">new</field>
+		</record>
+
+        <menuitem action="action_wizard_duplicar_oc_campanha" id="menu_wiz_cam" parent="purchase.menu_procurement_management" sequence="135" groups="budget_purchase_imj.group_purchase_duplicar_oc"/>
+
+    </data>
+</odoo>

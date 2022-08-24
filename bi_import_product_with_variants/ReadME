@@ -1,0 +1,12 @@
+
+v13.0.0.1
+-> added customer tax, vendor tax, tracking columns in import product template.
+
+Version:- 13.0.0.2
+-> Issues Fixed During importing attributes with same values.
+
+Version:- 13.0.0.3
+->Somw other Issues Fixed During importing attributes with same values.
+
+Version:- 13.0.0.4
+-> Raised warnign if attribute select and uploaded file in not given that column.

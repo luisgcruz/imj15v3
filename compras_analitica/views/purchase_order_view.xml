@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="purchase_order_analitica_form_view" model="ir.ui.view">
+        <field name="name">purchase.order.analitica.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">815</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="line_analitic_account" colspan="4"/>
+           </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_analitica_tree_view" model="ir.ui.view">
+        <field name="name">purchase.order.analitica.tree.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">913</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="line_analitic_account" optional="show"/>
+           </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_comercial_search_view" model="ir.ui.view">
+        <field name="name">purchase.order.comercial.search.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">911</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='order_date']" position="after">
+                <field name="line_analitic_account"/>
+                <group expand="0" string="Group By">
+                    <filter name="line_analitic_account" domain="[]" context="{'group_by': 'line_analitic_account'}"/>
+                </group>
+           </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_analitica_tree2_view" model="ir.ui.view">
+        <field name="name">purchase.order.analitica.tree2.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">914</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="line_analitic_account" optional="show"/>
+           </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_comercial_search2_view" model="ir.ui.view">
+        <field name="name">purchase.order.comercial.search2.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="priority">915</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='order_date']" position="after">
+                <field name="line_analitic_account"/>
+                <group expand="0" string="Group By">
+                    <filter name="line_analitic_account" domain="[]" context="{'group_by': 'line_analitic_account'}"/>
+                </group>
+           </xpath>
+        </field>
+    </record>
+</odoo>

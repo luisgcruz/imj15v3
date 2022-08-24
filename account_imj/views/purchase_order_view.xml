@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="purchase_order_account_imj_view" model="ir.ui.view">
+            <field name="name">purchase.order.account.imjm.view</field>
+            <field name="model">purchase.order</field>
+            <field name="priority">918</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_view_invoice'][not(hasclass('oe_highlight'))]" position="replace">
+                    <button name="action_view_invoice" string="Create Bill" type="object" context="{'create_bill':True}" attrs="{'invisible': ['|', '|', ('state', 'not in', ('purchase', 'done')), ('invoice_status', 'not in', ('no')), ('order_line', '=', [])]}"/>
+	            </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

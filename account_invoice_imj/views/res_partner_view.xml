@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_partner_es_vendedor_view" model="ir.ui.view">
+            <field name="name">res.partner.es.vendedor.view</field>
+            <field name="model">res.partner</field>
+            <field name="priority">925</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page/group/group/field[@name='user_id']" position="after">
+                    <field name="es_vendedor"/>
+	            </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding='UTF-8'?>
+<odoo>
+   
+    <record model="ir.cron" id="opinion_sat_expira_cron">
+		<field name="name">Checar opinion SAT</field>
+		<field name="model_id" ref="base.model_res_partner"/>
+		<field name="interval_number">1</field>
+		<field name="interval_type">days</field>
+		<field name="numbercall">-1</field>
+		<field name="doall" eval="False"/>
+		<field name="state">code</field>
+		<field name="code">model._cron_opinion_sat_expira()</field>
+	</record>
+			
+</odoo>

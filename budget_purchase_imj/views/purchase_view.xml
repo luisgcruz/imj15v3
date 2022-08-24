@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    
+
+    <record id="purchase_imj_approval_inherit" model="ir.ui.view">
+        <field name="name">purchase.imj.approval.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+        	<xpath expr="//field[@name='date_order']" position="after">
+                <field name="approval"/>
+                <field name="release_date"/>
+
+            </xpath>
+            
+            
+        </field>
+    </record>    
+    <record id="purchase_imj_approval_tree_inherit" model="ir.ui.view">
+        <field name="name">purchase.imj.approval.tree.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="approval" optional="show"/>
+                <field name="release_date" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='activity_ids']" position="before">
+                <field name="date_order" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="purchase.purchase_form_action" model="ir.actions.act_window">
+        <field name="domain">[('state','in',('purchase', 'done')),('approval','=', True),('release_date','&lt;=',datetime.datetime.now().strftime('%Y-%m-%d'))]</field>
+    </record>
+
+    <record id="purchase.purchase_rfq" model="ir.actions.act_window">
+        <field name="domain">[('release_date','&lt;=',datetime.datetime.now().strftime('%Y-%m-%d'))]</field>
+    </record>
+
+    <record id="purchase_release" model="ir.actions.act_window">
+            <field name="name">Compras por liberar</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">tree,kanban,form,pivot,graph,calendar,activity</field>
+            <field name="view_id" ref="purchase.purchase_order_kpis_tree"/>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+            <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+
+            
+        </record>
+        <menuitem action="purchase_release" id="menu_purchase_release"
+            parent="purchase.menu_procurement_management"
+            sequence="10" groups="budget_purchase_imj.group_purchase_release"/>
+
+</data>
+
+</odoo>    
+
+

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_partner_portal_imjm_view" model="ir.ui.view">
+            <field name="name">res.partner.portal.imjm.view</field>
+            <field name="model">res.partner</field>
+            <field name="priority">917</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='industry_id']" position="after">
+                    <field name="opinion_sat"/>
+                    <field name="estado_opinion"/>
+                    <field name="valid_until"/>
+                    <field name="opinion_msg_stat"/>
+                    <field name="exigir_complemento"/>
+	            </xpath>
+            </field>
+        </record>
+        <record id="res_partner_portal_imjm__search_view" model="ir.ui.view">
+            <field name="name">res.partner.portal.imjm.search.view</field>
+            <field name="model">res.partner</field>
+            <field name="priority">917</field>
+            <field name="inherit_id" ref="base.view_res_partner_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='inactive']" position="after">
+                    <filter string="Revisar opinion SAT" name="estado_opinion" domain="[('estado_opinion','=','revision')]"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

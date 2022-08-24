@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- Agrega el estado de factura subida del portal así como un botón para rechazarla-->
+        <record id="account_move_rechazar_factura" model="ir.ui.view">
+            <field name="name">account.move.rechazar.factura</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_bank_id']" position="after">
+                    <field name="estado_factura_portal" readonly="1" attrs="{'invisible': [('move_type', '!=', 'in_invoice')]}"/>
+                    <button name="rechazar_factura_portal" string="Rechazar factura" type="object"
+                            attrs="{'invisible': ['|', ('estado_factura_portal', 'in', ['pendiente','rechazado']), ('move_type', '!=', 'in_invoice')]}"/>
+                </xpath>
+            </field>
+        </record>
+	</data>
+</odoo>

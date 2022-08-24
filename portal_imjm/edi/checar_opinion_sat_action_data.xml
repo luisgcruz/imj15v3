@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data>
+        <!--Email template -->
+        <record id="email_template_edi_opinion_sat" model="mail.template">
+            <field name="name">Revision opinion SAT</field>
+            <field name="subject">La opinión del SAT para ${object.name or 'n/a' } está por expirar </field>
+            <field name="model_id" ref="portal_imjm.model_res_partner" />
+            <field name="auto_delete" eval="True" />
+            <field name="body_html"><![CDATA[
+                    <div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
+                        <p>A quién corresponda:</p>
+                        <p> Como es de su conocimiento, para poder subir sus facturas en nuestro portal es necesario<br/>
+                        contar con su opinión del SAT vigente con una antigüedad máxima de 90 días. La suya está por<br/>
+                        expirar el día <b>${object.valid_until}</b>, por lo que le sugerimos renovarla en cuanto le sea posible<br/>
+                        para evitar cualquier contratiempo en el proceso de recepción de facturas. Gracias.</p>
+                    </div>
+                        ]]>
+            </field>
+        </record>
+    </data>
+</odoo>

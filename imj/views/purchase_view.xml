@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    <record id="group_purchase_medio" model="res.groups">
+        <field name="name">Intermedio</field>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="category_id" ref="base.module_category_inventory_purchase"/>
+    </record>
+
+    <record id="purchase_imj_inherit" model="ir.ui.view">
+        <field name="name">purchase.imj.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+        	<xpath expr="//button[@name='button_confirm']" position="replace">
+                <button name="button_confirm" type="object" states="sent" string="Confirm Order" class="oe_highlight" id="bid_confirm" groups="imj.group_purchase_medio"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="replace">
+                <field name="partner_id" widget="res_partner_many2one" context="{'res_partner_search_mode': 'supplier', 'show_vat': True}" placeholder="Name, TIN, Email, or Reference" 
+                	domain="[('customer_rank', '=', 0)]"/>
+            </xpath>
+            <xpath expr="//field[@name='account_analytic_id']" position="replace">
+                <field name="account_analytic_id"  context="{'default_partner_id':parent.partner_id}" groups="analytic.group_analytic_accounting" domain="['|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]" required="True"/>
+            </xpath>
+            <xpath expr="//field[@name='analytic_tag_ids']" position="replace">
+                <field name="analytic_tag_ids" groups="analytic.group_analytic_tags" widget="many2many_tags" options="{'color_field': 'color'}" domain="['|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]" required="True"/>
+            </xpath>
+            
+        </field>
+    </record>
+<!--
+    <record id="purchase_cost_imj_inherit" model="ir.ui.view">
+        <field name="name">purchase.cost.imj.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="groups_id" eval="[(6,0,[ref('purchase.group_purchase_user')])]"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                <attribute name="force_save">True</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_cost_imj_inherit" model="ir.ui.view">
+        <field name="name">purchase.cost.imj.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="groups_id" eval="[(6,0,[ref('purchase.group_purchase_user')])]"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">True</attribute>
+            </xpath>
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                <attribute name="force_save">True</attribute>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="purchase_cost_admin_imj_inherit" model="ir.ui.view">
+        <field name="name">purchase.cost.admin.imj.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="groups_id" eval="[(6,0,[ref('purchase.group_purchase_manager'),ref('group_purchase_medio')])]"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">False</attribute>
+            </xpath>
+        </field>
+    </record>
+
+-->
+
+</data>
+
+</odoo>    
+
+
