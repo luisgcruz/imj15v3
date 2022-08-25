@@ -24,8 +24,9 @@ class CustomerPortal(CustomerPortal):
             values['pagos_count'] = request.env['account.payment'].search_count([('payment_type', '=', 'outbound'), ('partner_id', '=', partner_id), ('state', '!=', 'cancel')])
         dominio_compras = [('release_date', 'not in', False), ('state', 'in', ['purchase', 'done', 'draft']),
                            ('approval', '=', True), ('invoice_status', '!=', 'invoiced')]
-        values['purchase_count'] = request.env['purchase.order'].search_count(dominio_compras) if request.env[
+        values['purchase_count'] = request.env['purchase.order'].sudo(True).search_count(dominio_compras) if request.env[
             'purchase.order'].check_access_rights('read', raise_exception=False) else 0
+        print (values)
         return values
 
     def _account_payment_get_page_view_values(self, payment, access_token, **kwargs):
@@ -46,7 +47,7 @@ class CustomerPortal(CustomerPortal):
     @http.route(['/my/purchase', '/my/purchase/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_purchase_orders(self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, **kw):
         values = self._prepare_portal_layout_values()
-        PurchaseOrder = request.env['purchase.order']
+        PurchaseOrder = request.env['purchase.order'].sudo(True)
         domain = [('approval', '=', True), ('release_date', 'not in', False), ('invoice_status', '!=', 'invoiced')]
         archive_groups = self._get_archive_groups('purchase.order', domain) if values.get('my_details') else []
         if date_begin and date_end:
@@ -70,7 +71,6 @@ class CustomerPortal(CustomerPortal):
         if not filterby:
             filterby = 'all'
         domain += searchbar_filters[filterby]['domain']
-
         # count for pager
         purchase_count = PurchaseOrder.search_count(domain)
         # make pager

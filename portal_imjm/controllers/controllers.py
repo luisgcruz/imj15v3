@@ -22,7 +22,7 @@ CustomerPortal.OPTIONAL_BILLING_FIELDS.append('opinion_msg_stat')
 class CustomerPortal(CustomerPortal):
 
 
-    @http.route(['/upload/opinion/'], type='http', auth="user", method="post", csrf=False, website=True)
+    @http.route(['/upload/opinion/'], type='http', auth="user", methods=["post"], csrf=False, website=True)
     def upload_opinion_sat(self, **post):
         partner_id_int = post.get('partner') and int(post.get('partner')) or False
         partner_id = request.env['res.partner'].browse(partner_id_int)
@@ -48,7 +48,7 @@ class CustomerPortal(CustomerPortal):
                                                                            'valid_until': partner_id.valid_until or 'Fecha: por definir'})
 
     #funcion para subir xmls y pdfs de factura
-    @http.route(['/upload/archivos_factura/'], type='http', auth="user", method="post", csrf=False, website=True)
+    @http.route(['/upload/archivos_factura/'], type='http', auth="user", methods=["post"], csrf=False, website=True)
     def upload_archivos_factura(self, orden_id=None, access_token=None, **post):
         order_id_int = orden_id and int(orden_id) or None
         order_sudo = request.env['purchase.order'].sudo().browse(order_id_int)
@@ -222,7 +222,7 @@ class CustomerPortal(CustomerPortal):
         return None
 
     ###subir complemento de pago
-    @http.route(['/upload/archivos_cpago/'], type='http', auth="user", method="post", csrf=False, website=True)
+    @http.route(['/upload/archivos_cpago/'], type='http', auth="user", methods=["post"], csrf=False, website=True)
     def upload_archivos_complemento(self, orden_id=None, access_token=None, **post):
         order_id_int = orden_id and int(orden_id) or None
         order_sudo = request.env['account.payment'].sudo().browse(order_id_int)
