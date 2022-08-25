@@ -42,8 +42,7 @@ class CustomerPortal(CustomerPortal):
         }
         return self._get_page_view_values(payment, access_token, values, 'my_pago_history', False, **kwargs)
 
-        # sobreescribir funcion de lista de purchase orders
-
+    # sobreescribir funcion de lista de purchase orders
     @http.route(['/my/purchase', '/my/purchase/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_purchase_orders(self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, **kw):
         values = self._prepare_portal_layout_values()
