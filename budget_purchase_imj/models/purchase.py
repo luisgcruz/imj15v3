@@ -76,7 +76,7 @@ class PurchaseOrder(models.Model):
                 self.message_post(
                     body=('Se elimino el Visto Bueno'))
         if self.approval == True:# and self.state == 'purchase':
-            campos_permitidos = ['state', 'message_main_attachment_id', 'access_token', 'invoice_from_portal', 'invoice_status']
+            campos_permitidos = ['state', 'message_main_attachment_id', 'access_token', 'invoice_from_portal', 'invoice_status', 'notes']
             for campo in campos_permitidos:
                 if campo in values:
                     return res

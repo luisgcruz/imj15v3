@@ -213,8 +213,16 @@
                             <td class="text-right">
                                 <span t-field="order.amount" t-options='{"widget": "monetary", "display_currency": order.currency_id}'/>
                             </td>
-                            <td>
-                                <t t-esc="order.estado_rep_cfdi"/>
+                            <td class="tx_status" style="color:black">
+                                <t t-if="order.estado_rep_cfdi == 'pendiente'">
+                                    <span class="badge badge-pill badge-info"><i class="fa fa-fw fa-clock-o" aria-label="Opened" title="Opened" role="img"/><span class="d-none d-md-inline"> Pendiente</span></span>
+                                </t>
+                                <t t-if="order.estado_rep_cfdi == 'cargado'">
+                                    <span class="badge badge-pill badge-success"><i class="fa fa-fw fa-check" aria-label="Paid" title="Paid" role="img"/><span class="d-none d-md-inline"> Cargado</span></span>
+                                </t>
+                                <t t-if="order.estado_rep_cfdi == 'rechazado'">
+                                    <span class="badge badge-pill badge-warning"><i class="fa fa-fw fa-remove" aria-label="Cancelled" title="Cancelled" role="img"/><span class="d-none d-md-inline"> Rechazado</span></span>
+                                </t>
                             </td>
                         </tr>
                     </t>
