@@ -375,7 +375,7 @@
                 </t>
             </td>
         </xpath>
-        <xpath expr="//tbody/t/tr/td[4]" position="replace">
+        <xpath expr="//tbody/t/tr/td[1]" position="replace">
             <td>
                 <a t-att-href="invoice.get_portal_url()" t-att-title="invoice.name">
                     <t t-esc="invoice.invoice_portal_display_name" t-if="invoice.invoice_portal_display_name != False"/>
