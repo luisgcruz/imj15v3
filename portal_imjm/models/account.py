@@ -7,7 +7,8 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
 
-    l10n_mx_supplier_cfdi_uuid = fields.Char(string='Fiscal Folio Proveedor', copy=False, readonly=True,)
+    l10n_mx_supplier_cfdi_uuid = fields.Char(string='Fiscal Folio Proveedor', copy=False, readonly=True)
+    invoice_portal_display_name = fields.Char(string='Factura uuid y folio', copy=False, readonly=True)
     estado_factura_portal = fields.Selection(string='Estado factura desde portal', default='pendiente', copy=False,
                                        selection=[('pendiente', 'Por Cargar'), ('revision', 'En Revision'),
                                                   ('aceptado', 'Aceptado'), ('rechazado', 'Rechazado')])

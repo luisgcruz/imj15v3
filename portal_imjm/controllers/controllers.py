@@ -112,7 +112,13 @@ class CustomerPortal(CustomerPortal):
                             'type': 'binary'
                         })
                     order_sudo.invoice_status = 'invoiced'
-                    new_inv.l10n_mx_edi_cfdi_name = validacion[1] + '.xml'
+                    #new_inv.l10n_mx_edi_cfdi_name = validacion[1] + '.xml'
+                    new_inv.l10n_mx_supplier_cfdi_uuid = validacion[1]
+                    if validacion[1] != validacion[3]:
+                        inv_display_name = validacion[1] + ' (%s)'%validacion[3]
+                    else:
+                        inv_display_name = validacion[1]
+                    new_inv.invoice_portal_display_name = inv_display_name
                 values['upload_status_msg'] = 'Correcto'
         else:
             values['upload_status_msg'] = errores

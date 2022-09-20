@@ -351,6 +351,7 @@
           <div class="oe_structure mb32"/>
         </t>
     </template>
+    <!-- Inicia lista facturas -->
     <template id="portal_imjm_template_change_color_invoice" inherit_id="account.portal_my_invoices">
         <xpath expr="//th[hasclass('d-md-table-cell')]" position="replace">
             <th class='d-none d-md-table-cell'>Fecha de aprobación</th>
@@ -372,6 +373,14 @@
                 <t t-if="invoice.state == 'draft'">
                     <span class="badge badge-pill badge-light"><i class="fa fa-book fa-fw" aria-hidden="true" aria-label="Draft" title="Draft" role="img"/><span class="d-none d-md-inline">En Revisión</span></span>
                 </t>
+            </td>
+        </xpath>
+        <xpath expr="//tbody/t/tr/td[4]" position="replace">
+            <td>
+                <a t-att-href="invoice.get_portal_url()" t-att-title="invoice.name">
+                    <t t-esc="invoice.invoice_portal_display_name" t-if="invoice.invoice_portal_display_name != False"/>
+                    <em t-else="" t-esc="invoice.name"></em>
+                </a>
             </td>
         </xpath>
     </template>
